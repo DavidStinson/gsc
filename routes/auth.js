@@ -12,6 +12,8 @@ router.get(
       'https://www.googleapis.com/auth/spreadsheets',
       'https://www.googleapis.com/auth/drive',
     ],
+    accessType: "offline",
+    prompt: "consent",
   })
 )
 

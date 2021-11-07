@@ -10,10 +10,21 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK,
     },
-    function (accessToken, refreshToken, profile, done) {
+    function (accessToken, refreshToken, tokenDetails, profile, done) {
+      console.log("accessToken:", accessToken);
+      console.log("refreshToken:", refreshToken);
+      console.log("tokenDetails:", tokenDetails);
+      console.log("profile:", profile);
       User.findOne({ googleId: profile.id }, function (err, user) {
         if (err) return done(err)
         if (user) {
+          user.googleToken = {
+            accessToken,
+            refreshToken,
+            scope: tokenDetails.scope,
+            tokenType: tokenDetails.token_type,
+          }
+          user.save()
           return done(null, user)
         } else {
           const newProfile = new Profile({
@@ -23,7 +34,13 @@ passport.use(
           const newUser = new User({
             email: profile.emails[0].value,
             googleId: profile.id,
-            profile: newProfile._id
+            profile: newProfile._id,
+            googleToken: {
+              accessToken,
+              refreshToken,
+              scope: tokenDetails.scope,
+              tokenType: tokenDetails.token_type,
+            }
           })
           newProfile.save(function (err) {
             if (err) return done(err)
@@ -44,6 +61,7 @@ passport.use(
 )
 
 passport.serializeUser(function (user, done) {
+  console.log("passport serializer", user)
   done(null, user.id)
 })
 

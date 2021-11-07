@@ -7,6 +7,7 @@ import session from 'express-session'
 import logger from 'morgan'
 import methodOverride from 'method-override'
 import passport from 'passport'
+import { passUserToView, maintainGoogleToken } from "./middleware/middleware.js"
 
 // connect to MongoDB with mongoose
 import('./config/database.js')
@@ -17,6 +18,7 @@ import('./config/passport.js')
 // require routes
 import { router as indexRouter } from './routes/index.js'
 import { router as authRouter } from './routes/auth.js'
+import { router as testRouter } from "./routes/test.js"
 
 // create the express app
 const app = express()
@@ -55,9 +57,13 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 
+app.use(passUserToView)
+app.use(maintainGoogleToken)
+
 // router middleware
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
+app.use("/test", testRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
