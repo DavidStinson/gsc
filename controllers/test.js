@@ -5,20 +5,45 @@ import * as gDriveHelpers from "../helpers/g-drive-lib.js"
 async function index(req, res) {
   try {
     const sheets = google.sheets({ version: "v4", auth: req.googleOAuthClient })
-    const drive = google.drive({ version: "v3", auth: req.googleOAuthClient})
-    req.body.spread = "18l5BhNFhEDFElnKlTRaXRlWgb6RE5ArmQChUb4QLJiY"
-    const spread = await gSheetsHelpers.getSpreadsheet(
+    const drive = google.drive({ version: "v3", auth: req.googleOAuthClient })
+    req.body.templateSpreadsheet =
+      "18l5BhNFhEDFElnKlTRaXRlWgb6RE5ArmQChUb4QLJiY"
+    req.body.dataSourceSpreadsheet =
+      "1Q2_IsFYekwpiafXPMVlxGJw0Q9SeEbxREzRZaGqkwkw"
+    req.body.range = req.body.range ? req.body.range : "ProjectDetails"
+    const templateSpreadsheet = await gSheetsHelpers.getSpreadsheet(
       sheets,
-      req.body.spread
+      req.body.templateSpreadsheet,
     )
-    const newSpreadTitle = `test ${spread.properties.title}`
-    await gDriveHelpers.copyFileInPlace(drive, req.body.spread, newSpreadTitle)
-    
+    const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
+      sheets,
+      req.body.templateSpreadsheet,
+      [
+        "StudentName",
+        "ProjectName",
+        "GitHubLink",
+        "DeploymentLink",
+        "ProjectPlanningMaterials",
+      ],
+    )
+    const sourceData = await gSheetsHelpers.getRangeValuesFromSpreadsheet(
+      sheets,
+      req.body.dataSourceSpreadsheet,
+      req.body.range
+    )
+    sourceData.forEach((row) => {
+      const newFile = await gDriveHelpers.copyFileInPlace(
+        drive,
+        req.body.templateSpreadsheet,
+        newSpreadsheetTitle
+      )
+    })
+    const newSpreadsheetTitle = `test ${templateSpreadsheet.properties.title}`
   } catch (error) {
     if (error.response?.data) {
       const apiError = error.response
       console.log("THE API ERROR:", apiError.data?.error?.message)
-      if (apiError.data.error.code === 404){
+      if (apiError.data.error.code === 404) {
         console.log("While looking for this resource:", apiError.config.url)
         console.log("Ensure you provided the correct values.")
       }
@@ -26,8 +51,6 @@ async function index(req, res) {
       console.log("THIS ERROR WAS THROWN:", error)
     }
   }
-
-
 
   // sheets.spreadsheets
   //   .get({
@@ -43,7 +66,7 @@ async function index(req, res) {
   //     // })
   //   })
   //   .catch((error) => {
-      
+
   //   })
   //  (err, response) => {
   //   if (err) return console.log('The API returned an error: ' + err)
