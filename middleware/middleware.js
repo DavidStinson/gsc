@@ -28,10 +28,9 @@ function maintainGoogleToken(req, res, next) {
   }
 
   req.googleOAuthClient.setCredentials(credentials)
-  
-  console.log(req.googleOAuthClient);
 
   req.googleOAuthClient.on('tokens', (tokens) => {
+    console.log("THE TOKEN EVENT IS FIRING OFF NOW!!!!")
     if (tokens.refresh_token) {
       User.findById(req.user._id)
       .then(user => {

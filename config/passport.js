@@ -11,10 +11,6 @@ passport.use(
       callbackURL: process.env.GOOGLE_CALLBACK,
     },
     function (accessToken, refreshToken, tokenDetails, profile, done) {
-      console.log("accessToken:", accessToken);
-      console.log("refreshToken:", refreshToken);
-      console.log("tokenDetails:", tokenDetails);
-      console.log("profile:", profile);
       User.findOne({ googleId: profile.id }, function (err, user) {
         if (err) return done(err)
         if (user) {
@@ -61,7 +57,6 @@ passport.use(
 )
 
 passport.serializeUser(function (user, done) {
-  console.log("passport serializer", user)
   done(null, user.id)
 })
 
