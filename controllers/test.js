@@ -15,30 +15,43 @@ async function index(req, res) {
       sheets,
       req.body.templateSpreadsheet,
     )
-    const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
-      sheets,
-      req.body.templateSpreadsheet,
-      [
-        "StudentName",
-        "ProjectName",
-        "GitHubLink",
-        "DeploymentLink",
-        "ProjectPlanningMaterials",
-      ],
-    )
+    // const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
+    //   sheets,
+    //   req.body.templateSpreadsheet,
+    //   [
+    //     "StudentName",
+    //     "ProjectName",
+    //     "GitHubLink",
+    //     "DeploymentLink",
+    //     "ProjectPlanningMaterials",
+    //   ],
+    // )
+    // console.log(destinationRanges)
     const sourceData = await gSheetsHelpers.getRangeValuesFromSpreadsheet(
       sheets,
       req.body.dataSourceSpreadsheet,
       req.body.range
     )
-    sourceData.forEach((row) => {
+    const truncatedSourceData = sourceData.splice(29, 5)
+    truncatedSourceData.forEach(async (row) => {
+      const newSpreadsheetTitle = `${row[0]} - ${templateSpreadsheet.properties.title}`
       const newFile = await gDriveHelpers.copyFileInPlace(
         drive,
         req.body.templateSpreadsheet,
         newSpreadsheetTitle
       )
+      const newSpreadsheetid = newFile.data.id
+      const dataToFill = {
+        range: "C3:C7",
+        majorDimension: "COLUMNS",
+        values: [[
+           row[0], row[1], row[4], row[2], row[3]
+        ]]
+      }
+      console.log(dataToFill)
+      const finished = await gSheetsHelpers.updateSpreadsheet(sheets, newSpreadsheetid, dataToFill)
+      console.log(finished)
     })
-    const newSpreadsheetTitle = `test ${templateSpreadsheet.properties.title}`
   } catch (error) {
     if (error.response?.data) {
       const apiError = error.response
