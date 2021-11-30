@@ -1,15 +1,20 @@
 import { google } from "googleapis"
+import Bottleneck from "bottleneck"
 import * as gSheetsHelpers from "../helpers/g-sheets-lib.js"
 import * as gDriveHelpers from "../helpers/g-drive-lib.js"
 
 async function index(req, res) {
+  const limiter = new Bottleneck({
+    minTime: 50,
+    maxConcurrent: 1,
+  })
   try {
     const sheets = google.sheets({ version: "v4", auth: req.googleOAuthClient })
     const drive = google.drive({ version: "v3", auth: req.googleOAuthClient })
     req.body.templateSpreadsheet =
-      "18l5BhNFhEDFElnKlTRaXRlWgb6RE5ArmQChUb4QLJiY"
+      "13dXZs4AzO8sKwXAgOgQNWl7teM9DU6O3utTEwdSI5rw"
     req.body.dataSourceSpreadsheet =
-      "1Q2_IsFYekwpiafXPMVlxGJw0Q9SeEbxREzRZaGqkwkw"
+      "11IC77QB6zfvRVAw0qbnl-DENl3woZ445pWYrPQTWAno"
     req.body.range = req.body.range ? req.body.range : "ProjectDetails"
     const templateSpreadsheet = await gSheetsHelpers.getSpreadsheet(
       sheets,
@@ -32,14 +37,15 @@ async function index(req, res) {
       req.body.dataSourceSpreadsheet,
       req.body.range
     )
-    const truncatedSourceData = sourceData.splice(29, 5)
-    truncatedSourceData.forEach(async (row) => {
+    sourceData.forEach(async (row) => {
       const newSpreadsheetTitle = `${row[0]} - ${templateSpreadsheet.properties.title}`
-      const newFile = await gDriveHelpers.copyFileInPlace(
-        drive,
-        req.body.templateSpreadsheet,
-        newSpreadsheetTitle
-      )
+      const newFile = await limiter.schedule(() => (
+        gDriveHelpers.copyFileInPlace(
+          drive,
+          req.body.templateSpreadsheet,
+          newSpreadsheetTitle,
+        )
+      ))
       const newSpreadsheetid = newFile.data.id
       const dataToFill = {
         range: "C3:C7",
@@ -48,8 +54,11 @@ async function index(req, res) {
            row[0], row[1], row[4], row[2], row[3]
         ]]
       }
-      console.log(dataToFill)
-      const finished = await gSheetsHelpers.updateSpreadsheet(sheets, newSpreadsheetid, dataToFill)
+      const finished = await gSheetsHelpers.updateSpreadsheet(
+        sheets, 
+        newSpreadsheetid, 
+        dataToFill,
+      )
       console.log(finished)
     })
   } catch (error) {
