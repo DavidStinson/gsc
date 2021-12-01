@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import * as testCtrl from "../controllers/test.js"
+import * as googleCtrl from "../controllers/google.js"
 import { isLoggedIn } from '../middleware/middleware.js'
 
 const router = Router()
 
-router.get('/', isLoggedIn, testCtrl.index)
+router.get('/', isLoggedIn, googleCtrl.index)
 
 export {
   router

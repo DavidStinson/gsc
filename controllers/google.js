@@ -5,9 +5,15 @@ import * as gDriveHelpers from "../helpers/g-drive-lib.js"
 
 async function index(req, res) {
   const limiter = new Bottleneck({
-    minTime: 50,
+    minTime: 250,
     maxConcurrent: 1,
   })
+  const namedRanges = [
+    "StudentName",
+    "ProjectName",
+    "GitHubLink",
+    "DeploymentLink",
+  ]
   try {
     const sheets = google.sheets({ version: "v4", auth: req.googleOAuthClient })
     const drive = google.drive({ version: "v3", auth: req.googleOAuthClient })
@@ -15,23 +21,19 @@ async function index(req, res) {
       "13dXZs4AzO8sKwXAgOgQNWl7teM9DU6O3utTEwdSI5rw"
     req.body.dataSourceSpreadsheet =
       "11IC77QB6zfvRVAw0qbnl-DENl3woZ445pWYrPQTWAno"
+    req.body.projectPlanning = true
     req.body.range = req.body.range ? req.body.range : "ProjectDetails"
+    if (req.body.projectPlanning) namedRanges.push("ProjectPlanningMaterials")
     const templateSpreadsheet = await gSheetsHelpers.getSpreadsheet(
       sheets,
       req.body.templateSpreadsheet,
     )
-    // const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
-    //   sheets,
-    //   req.body.templateSpreadsheet,
-    //   [
-    //     "StudentName",
-    //     "ProjectName",
-    //     "GitHubLink",
-    //     "DeploymentLink",
-    //     "ProjectPlanningMaterials",
-    //   ],
-    // )
-    // console.log(destinationRanges)
+    const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
+      sheets,
+      req.body.templateSpreadsheet,
+      namedRanges,
+    )
+    console.log(destinationRanges)
     const sourceData = await gSheetsHelpers.getRangeValuesFromSpreadsheet(
       sheets,
       req.body.dataSourceSpreadsheet,
@@ -46,7 +48,8 @@ async function index(req, res) {
           newSpreadsheetTitle,
         )
       ))
-      const newSpreadsheetid = newFile.data.id
+      const newSpreadsheetId = newFile.data.id
+      console.log("newSSID", newSpreadsheetId)
       const dataToFill = {
         range: "C3:C7",
         majorDimension: "COLUMNS",
@@ -56,10 +59,9 @@ async function index(req, res) {
       }
       const finished = await gSheetsHelpers.updateSpreadsheet(
         sheets, 
-        newSpreadsheetid, 
+        newSpreadsheetId, 
         dataToFill,
       )
-      console.log(finished)
     })
   } catch (error) {
     if (error.response?.data) {

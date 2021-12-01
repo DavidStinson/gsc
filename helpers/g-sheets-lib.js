@@ -12,14 +12,14 @@ async function getRangeValuesFromSpreadsheet(sheets, spreadsheetId, range) {
   return spreadsheetRange.data.values
 }
 
-// async function getRangesFromSpreadsheet(sheets, spreadsheetId, ranges) {
-//   console.log(spreadsheetId)
-//   const spreadsheetRange = await sheets.spreadsheets.get({
-//     spreadsheetId,
-//     ranges
-//   })
-//   return spreadsheetRange.data.namedRanges
-// }
+async function getRangesFromSpreadsheet(sheets, spreadsheetId, ranges) {
+  console.log(spreadsheetId)
+  const spreadsheetRange = await sheets.spreadsheets.get({
+    spreadsheetId,
+    ranges
+  })
+  return spreadsheetRange.data.namedRanges
+}
 
 async function updateSpreadsheet(sheets, spreadsheetId, request) {
   await sheets.spreadsheets.values.update({
@@ -32,6 +32,7 @@ async function updateSpreadsheet(sheets, spreadsheetId, request) {
 
 export {
   getSpreadsheet,
+  getRangesFromSpreadsheet,
   getRangeValuesFromSpreadsheet,
   updateSpreadsheet,
 }

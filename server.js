@@ -18,7 +18,7 @@ import('./config/passport.js')
 // require routes
 import { router as indexRouter } from './routes/index.js'
 import { router as authRouter } from './routes/auth.js'
-import { router as testRouter } from "./routes/test.js"
+import { router as googleRouter } from "./routes/google.js"
 
 // create the express app
 const app = express()
@@ -63,7 +63,7 @@ app.use(maintainGoogleToken)
 // router middleware
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
-app.use("/test", testRouter)
+app.use("/test", googleRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -78,7 +78,8 @@ app.use(function (err, req, res, next) {
   // render the error page
   res.status(err.status || 500)
   res.render('error', {
-    title: `🎊 ${err.status || 500} Error`
+    title: `🎊 ${err.status || 500} Error`,
+    user: req.user ? req.user : null,
   })
 })
 
