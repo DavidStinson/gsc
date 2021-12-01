@@ -63,7 +63,7 @@ app.use(maintainGoogleToken)
 // router middleware
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
-app.use("/test", googleRouter)
+app.use("/google", googleRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

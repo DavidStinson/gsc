@@ -4,7 +4,6 @@ async function getSpreadsheet(sheets, spreadsheetId) {
 }
 
 async function getRangeValuesFromSpreadsheet(sheets, spreadsheetId, range) {
-  console.log(spreadsheetId)
   const spreadsheetRange = await sheets.spreadsheets.values.get({
     spreadsheetId,
     range
@@ -13,7 +12,6 @@ async function getRangeValuesFromSpreadsheet(sheets, spreadsheetId, range) {
 }
 
 async function getRangesFromSpreadsheet(sheets, spreadsheetId, ranges) {
-  console.log(spreadsheetId)
   const spreadsheetRange = await sheets.spreadsheets.get({
     spreadsheetId,
     ranges
@@ -30,9 +28,20 @@ async function updateSpreadsheet(sheets, spreadsheetId, request) {
   })
 }
 
+async function batchUpdateSpreadsheet(sheets, spreadsheetId, request) {
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId,
+    resource: {
+      valueInputOption: "RAW",
+      data: request
+    }
+  })
+}
+
 export {
   getSpreadsheet,
   getRangesFromSpreadsheet,
   getRangeValuesFromSpreadsheet,
   updateSpreadsheet,
+  batchUpdateSpreadsheet,
 }

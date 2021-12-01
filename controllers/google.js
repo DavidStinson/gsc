@@ -5,15 +5,10 @@ import * as gDriveHelpers from "../helpers/g-drive-lib.js"
 
 async function index(req, res) {
   const limiter = new Bottleneck({
-    minTime: 250,
+    minTime: 5000,
     maxConcurrent: 1,
   })
-  const namedRanges = [
-    "StudentName",
-    "ProjectName",
-    "GitHubLink",
-    "DeploymentLink",
-  ]
+
   try {
     const sheets = google.sheets({ version: "v4", auth: req.googleOAuthClient })
     const drive = google.drive({ version: "v3", auth: req.googleOAuthClient })
@@ -23,23 +18,16 @@ async function index(req, res) {
       "11IC77QB6zfvRVAw0qbnl-DENl3woZ445pWYrPQTWAno"
     req.body.projectPlanning = true
     req.body.range = req.body.range ? req.body.range : "ProjectDetails"
-    if (req.body.projectPlanning) namedRanges.push("ProjectPlanningMaterials")
     const templateSpreadsheet = await gSheetsHelpers.getSpreadsheet(
       sheets,
       req.body.templateSpreadsheet,
     )
-    const destinationRanges = await gSheetsHelpers.getRangesFromSpreadsheet(
-      sheets,
-      req.body.templateSpreadsheet,
-      namedRanges,
-    )
-    console.log(destinationRanges)
     const sourceData = await gSheetsHelpers.getRangeValuesFromSpreadsheet(
       sheets,
       req.body.dataSourceSpreadsheet,
       req.body.range
     )
-    sourceData.forEach(async (row) => {
+    for (const row of sourceData) {
       const newSpreadsheetTitle = `${row[0]} - ${templateSpreadsheet.properties.title}`
       const newFile = await limiter.schedule(() => (
         gDriveHelpers.copyFileInPlace(
@@ -49,20 +37,38 @@ async function index(req, res) {
         )
       ))
       const newSpreadsheetId = newFile.data.id
-      console.log("newSSID", newSpreadsheetId)
-      const dataToFill = {
-        range: "C3:C7",
-        majorDimension: "COLUMNS",
-        values: [[
-           row[0], row[1], row[4], row[2], row[3]
-        ]]
+      console.log("SId", newSpreadsheetId)
+      const dataToFill = [
+        {
+          range: "StudentName",
+          values: [[row[0]]]
+        },
+        {
+          range: "ProjectName",
+          values: [[row[1]]]
+        },
+        {
+          range: "GitHubLink",
+          values: [[row[2]]]
+        },
+        {
+          range: "DeploymentLink",
+          values: [[row[3]]]
+        },
+      ]
+      if (req.body.projectPlanning) {
+        dataToFill.push({
+          range: "ProjectPlanningMaterials",
+          values: [[row[4]]]
+        })
       }
-      const finished = await gSheetsHelpers.updateSpreadsheet(
-        sheets, 
-        newSpreadsheetId, 
-        dataToFill,
+      await gSheetsHelpers.batchUpdateSpreadsheet(
+        sheets,
+        newSpreadsheetId,
+        dataToFill
       )
-    })
+    }
+    res.redirect("/")
   } catch (error) {
     if (error.response?.data) {
       const apiError = error.response
@@ -74,37 +80,8 @@ async function index(req, res) {
     } else {
       console.log("THIS ERROR WAS THROWN:", error)
     }
+    res.redirect("/")
   }
-
-  // sheets.spreadsheets
-  //   .get({
-  //     spreadsheetId: "18l5BhNFhEDFElnKlTRaXRlWgb6RE5ArmQChUb4QLJiY",
-  //   })
-  //   .then((response) => {
-  //     console.log(response.data)
-  //     console.log(response.data.sheets)
-  //     // const rows = response.data.values
-  //     // if (!rows.length) throw new Error("No data found")
-  //     // rows.forEach(row => {
-
-  //     // })
-  //   })
-  //   .catch((error) => {
-
-  //   })
-  //  (err, response) => {
-  //   if (err) return console.log('The API returned an error: ' + err)
-  //   const rows = response.data.values
-  //   if (rows.length) {
-  //     console.log('Name, Project Name, Project Planning Materials, GitHub Link, Deployment Link')
-  //     // Print columns A through E, which correspond to indices 0 and 4.
-  //     rows.map((row) => {
-  //       console.log(`${row[0]}, ${row[1]}, ${row[2]}, ${row[3]}, ${row[4]}`)
-  //     })
-  //   } else {
-  //     console.log('No data found.')
-  //   }
-  // })
 }
 
 export { index }
