@@ -7,13 +7,14 @@ router.get(
   '/google',
   passport.authenticate('google', {
     scope: [
-      'profile',
-      'email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/spreadsheets',
       'https://www.googleapis.com/auth/drive',
     ],
     accessType: "offline",
     prompt: "consent",
+    keepSessionInfo: true,
   })
 )
 

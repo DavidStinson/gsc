@@ -18,7 +18,7 @@ import('./config/passport.js')
 // require routes
 import { router as indexRouter } from './routes/index.js'
 import { router as authRouter } from './routes/auth.js'
-import { router as googleRouter } from "./routes/google.js"
+import { router as buildRouter } from "./routes/build.js"
 
 // create the express app
 const app = express()
@@ -63,7 +63,7 @@ app.use(maintainGoogleToken)
 // router middleware
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
-app.use("/google", googleRouter)
+app.use("/build", buildRouter)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
