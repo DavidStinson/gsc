@@ -10,40 +10,45 @@
       <p>(Ensure this account has access to the files you need!)</p>
     </div>
   <% } else {%>
-    <div id="radioInputs">
+    <div>
+      <p>What unit is this code review for?</p>
+    </div>
+
+    <div id="radio-inputs">
       <input 
         type="radio" 
-        id="unit1"
-        name="unit1" 
-        value="unit1"
+        id="unit-one"
+        name="unit" 
+        value="unit-one"
+        checked
       >
-      <label for="unit1">Unit 1</label>
+      <label for="unit-one">Unit 1</label>
   
       <input 
         type="radio" 
-        id="unit2"
-        name="unit2" 
-        value="unit2"
+        id="unit-two"
+        name="unit" 
+        value="unit-two"
       >
-      <label for="unit2">Unit 2</label>
+      <label for="unit-two">Unit 2</label>
   
       <input 
         type="radio"
-        id="unit3"
-        name="unit3" 
-        value="unit3"
+        id="unit-three"
+        name="unit" 
+        value="unit-three"
       >
-      <label for="unit3">Unit 3</label>
+      <label for="unit-three">Unit 3</label>
 
       <input 
         type="radio"
-        id="unit4"
-        name="unit4" 
-        value="unit4"
+        id="unit-four"
+        name="unit" 
+        value="unit-four"
       >
-      <label for="unit4">Unit 4</label>
+      <label for="unit-four">Unit 4</label>
     </div>
-    <form action="/build/" method="POST">
+    <form action="/build/unit-one" method="POST" id="form">
 
     </form>
     <a href="/build/unit1">Build Unit 1</a>

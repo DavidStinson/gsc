@@ -1,11 +1,11 @@
 import { Router } from 'express'
-import * as buildCtrl from "../controllers/google.js"
+import * as buildCtrl from "../controllers/build.js"
 import { isLoggedIn } from '../middleware/middleware.js'
 
 const router = Router()
 
-router.get('/unit1', isLoggedIn, buildCtrl.unit1)
-router.get('/unit4', isLoggedIn, buildCtrl.unit4)
+router.get('/unit-one', isLoggedIn, buildCtrl.unitOne)
+router.get('/unit-four', isLoggedIn, buildCtrl.unitFour)
 
 export {
   router

@@ -11,45 +11,7 @@ function isLoggedIn(req, res, next) {
   res.redirect("/auth/google")
 }
 
-function maintainGoogleToken(req, res, next) {
-  const user = req.user ? req.user : null
-  if (!user) return next()
-
-  try {
-    req.googleOAuthClient = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      process.env.GOOGLE_CALLBACK
-    )
-    
-    const credentials = {
-      access_token: req.user.googleToken.accessToken,
-      refresh_token: req.user.googleToken.refreshToken,
-      scope: req.user.googleToken.scope,
-      token_type: req.user.googleToken.tokenType
-    }
-  
-    req.googleOAuthClient.setCredentials(credentials)
-  
-    req.googleOAuthClient.on('tokens', (tokens) => {
-      console.log("THE TOKEN EVENT IS FIRING OFF NOW!!!!")
-      if (tokens.refresh_token) {
-        User.findById(req.user._id)
-        .then(user => {
-          user.googleToken.refreshToken = tokens.refresh_token
-          user.googleToken.accessToken = tokens.access_token
-          user.save()
-        })
-      }
-    })
-    next()
-  } catch(err) {
-    console.log(err)
-  }
-}
-
 export {
   passUserToView,
-  isLoggedIn,
-  maintainGoogleToken
+  isLoggedIn
 }

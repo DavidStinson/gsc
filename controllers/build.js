@@ -3,7 +3,7 @@ import * as gSheetsHelpers from '../helpers/g-sheets-lib.js'
 import * as gDriveHelpers from '../helpers/g-drive-lib.js'
 import { backOff } from 'exponential-backoff'
 
-async function unit1(req, res) {
+async function unitOne(req, res) {
   try {
     const sheets = google.sheets({ version: 'v4', auth: req.googleOAuthClient })
     const drive = google.drive({ version: 'v3', auth: req.googleOAuthClient })
@@ -84,7 +84,7 @@ async function unit1(req, res) {
   }
 }
 
-async function unit4(req, res) {
+async function unitFour(req, res) {
   try {
     const sheets = google.sheets({ version: 'v4', auth: req.googleOAuthClient })
     const drive = google.drive({ version: 'v3', auth: req.googleOAuthClient })
@@ -286,4 +286,4 @@ async function unit4(req, res) {
   }
 }
 
-export { unit1, unit4 }
+export { unitOne, unitFour }
