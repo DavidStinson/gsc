@@ -3,17 +3,50 @@
 
 <main>
   <h1>hello, <%= user ? user.profile.name : "friend" %></h1>
-  <% if (user?.profile.avatar) { %>
+  <h2>Let's build some code reviews!</h2>
+  <% if (!user) { %>
     <div>
-      <img 
-        src="<%= user.profile.avatar %>" 
-        alt="<%= user.profile.name %> avatar"
-      >
+      <p>Start by logging into your Google account above.</p>
+      <p>(Ensure this account has access to the files you need!)</p>
     </div>
+  <% } else {%>
+    <div id="radioInputs">
+      <input 
+        type="radio" 
+        id="unit1"
+        name="unit1" 
+        value="unit1"
+      >
+      <label for="unit1">Unit 1</label>
+  
+      <input 
+        type="radio" 
+        id="unit2"
+        name="unit2" 
+        value="unit2"
+      >
+      <label for="unit2">Unit 2</label>
+  
+      <input 
+        type="radio"
+        id="unit3"
+        name="unit3" 
+        value="unit3"
+      >
+      <label for="unit3">Unit 3</label>
+
+      <input 
+        type="radio"
+        id="unit4"
+        name="unit4" 
+        value="unit4"
+      >
+      <label for="unit4">Unit 4</label>
+    </div>
+    <form action="/build/" method="POST">
+
+    </form>
   <% } %>
-  <a href="/google" style="font-size: 48px; margin-top: 24px;">
-    TEST TIME AMIRITE?
-  </a>
 </main>
 
 <%- include('./partials/footer') %>

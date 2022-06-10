@@ -4,7 +4,7 @@ import { isLoggedIn } from '../middleware/middleware.js'
 
 const router = Router()
 
-router.get('/', isLoggedIn, googleCtrl.index)
+router.get('/unit4', isLoggedIn, googleCtrl.unit4)
 
 export {
   router
