@@ -58,7 +58,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.use(passUserToView)
-app.use(maintainGoogleToken)
+// app.use(maintainGoogleToken)
 
 // router middleware
 app.use('/', indexRouter)
