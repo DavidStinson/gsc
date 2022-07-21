@@ -84,6 +84,91 @@ async function unitOne(req, res) {
   }
 }
 
+async function unitTwo(req, res) {
+  try {
+    const sheets = google.sheets({ version: 'v4', auth: req.googleOAuthClient })
+    const drive = google.drive({ version: 'v3', auth: req.googleOAuthClient })
+    req.body.dataSourceSpreadsheet =
+      '1IQGo6yt6LGhVqwlyVwKHeTNRAkXuzsX4IhpoBBl95fo'
+    req.body.range = req.body.range ? req.body.range : 'ProjectDetails'
+    const sourceData = await gSheetsHelpers.getRangeValuesFromSpreadsheet(
+      sheets,
+      req.body.dataSourceSpreadsheet,
+      req.body.range
+    )
+    for (const row of sourceData) {
+      await backOff(
+        async () => {
+          req.body.templateSpreadsheet = "1TBhf46Ofya3ZPuzmtaSvp4uJTpilsGkcm976Hnf5JxI"
+          const templateSpreadsheet = await gSheetsHelpers.getSpreadsheet(
+            sheets,
+            req.body.templateSpreadsheet
+          )
+          const newSpreadsheetTitle = `${row[0]} - ${templateSpreadsheet.properties.title}`
+          const newFile = await gDriveHelpers.copyFileInPlace(
+            drive,
+            req.body.templateSpreadsheet,
+            newSpreadsheetTitle
+          )
+          const newSpreadsheetId = newFile.data.id
+          console.log('🚀 nSId/title', newSpreadsheetId, newSpreadsheetTitle)
+          const dataToFill = [
+            {
+              range: 'StudentName',
+              values: [[row[0]]],
+            },
+            {
+              range: 'ProjectName',
+              values: [[row[1]]]
+            },
+            {
+              range: 'ProjectPlanningMaterials',
+              values: [[row[2]]],
+            },
+            {
+              range: 'GitHubLink',
+              values: [[row[3]]],
+            },
+            {
+              range: 'DeploymentLink',
+              values: [[row[4]]],
+            },
+          ]
+          await gSheetsHelpers.batchUpdateSpreadsheet(
+            sheets,
+            newSpreadsheetId,
+            dataToFill
+          )
+        },
+        {
+          maxDelay: 64000,
+          retry: function (error, attemptNumber) {
+            console.error(
+              `a backoff error occurred on attempt number ${attemptNumber}:`,
+              error
+            )
+            return true
+          },
+        }
+      )
+    }
+    res.redirect('/')
+  } catch (error) {
+    if (error.response?.data) {
+      const apiError = error.response
+      console.error(apiError)
+      console.error('THE API ERROR:', apiError.data?.error?.errors)
+      if (apiError.data.error.code === 404) {
+        console.error('While looking for this resource:', apiError.config.url)
+        console.error('Ensure you provided the correct values.')
+      }
+    } else {
+      console.error('THIS ERROR WAS THROWN:', error)
+    }
+    res.redirect('/')
+  }
+}
+
 async function unitFour(req, res) {
   try {
     const sheets = google.sheets({ version: 'v4', auth: req.googleOAuthClient })
@@ -260,7 +345,7 @@ async function unitFour(req, res) {
         {
           maxDelay: 64000,
           retry: function (error, attemptNumber) {
-            console.log(
+            console.error(
               `a backoff error occurred on attempt number ${attemptNumber}:`,
               error
             )
@@ -286,4 +371,4 @@ async function unitFour(req, res) {
   }
 }
 
-export { unitOne, unitFour }
+export { unitOne, unitTwo, unitThree, unitFour }

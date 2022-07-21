@@ -11,7 +11,7 @@ passport.use(new GoogleStrategy({
   function (accessToken, refreshToken, tokenDetails, profile, done) {
     User.findOne({ googleId: profile.id }, function (err, user) {
       if (err) {
-        console.log(err)
+        console.error(err)
         return done(err)
       }
       if (user) {
@@ -41,13 +41,13 @@ passport.use(new GoogleStrategy({
         })
         newProfile.save(function (err) {
           if (err) {
-            console.log(err)
+            console.error(err)
             return done(err)
           }
         })
         newUser.save(function (err) {
           if (err) {
-            console.log(err)
+            console.error(err)
             // Something went wrong while making a user - delete the profile
             // we just created to prevent orphan profiles.
             Profile.findByIdAndDelete(newProfile._id)
